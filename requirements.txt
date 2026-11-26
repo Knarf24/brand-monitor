@@ -1,0 +1,3 @@
+# Nothing to install: monitor.py and collect.py use only the Python standard library
+# plus the bundled vaderSentiment folder (MIT licence). For the tests:
+pytest

@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brand Reputation Monitor</title>
+  <meta name="description" content="Type a brand, product or name and see what news sites, Reddit, Hacker News, Bluesky and Mastodon are saying about it, scored by mood. Written in Python, running in your browser.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📣</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>📣 Brand Reputation Monitor</h1>
+    <p class="lead">Small businesses rarely know what people say about them online, and checking every news site
+      and forum by hand takes hours. Type a <b>brand, product or name</b> and this app gathers what
+      <b>news sites, Reddit, Hacker News, Bluesky and Mastodon</b> said about it, <b>scores each mention by mood</b>
+      and tells you what people praise, what they complain about, and whether complaints are rising.</p>
+    <p class="py">🐍 The reading and mood scoring is Python (VADER sentiment) running right here in your browser
+      with Pyodide. No account, no paid services, nothing stored on a server.</p>
+  </header>
+
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div>
+      <b id="loadText">Starting Python…</b>
+      <div class="small">First visit downloads about 10 MB. Later visits are faster.</div>
+    </div>
+  </div>
+
+  <section class="card search">
+    <form id="form" class="row">
+      <input id="name" type="search" placeholder="Brand, product or person, e.g. Spotify" maxlength="60"
+        autocomplete="off" aria-label="Name to check" required disabled>
+      <select id="days" aria-label="How far back" disabled>
+        <option value="1">Last 24 hours</option>
+        <option value="3">Last 3 days</option>
+        <option value="7" selected>Last 7 days</option>
+        <option value="14">Last 14 days</option>
+        <option value="30">Last 30 days</option>
+      </select>
+      <button id="go" class="btn primary" type="submit" disabled>🔎 Check reputation</button>
+    </form>
+    <label class="small opt"><input id="strict" type="checkbox" checked> Only posts that actually name it
+      (turn off for very new or unusual names)</label>
+    <div class="small examples">Try: <span id="examples"></span></div>
+    <div id="statuses" class="statuses" hidden></div>
+  </section>
+
+  <div id="message" class="message" hidden></div>
+
+  <main id="results" hidden>
+    <section class="summary card">
+      <div class="gauge-wrap">
+        <div id="gauge" class="gauge"><span id="moodNum">–</span><small>/100</small></div>
+        <div>
+          <div class="small">Mood score for</div>
+          <h2 id="rName">–</h2>
+          <div id="verdict" class="verdict">–</div>
+          <div id="rMeta" class="small"></div>
+        </div>
+      </div>
+      <div>
+        <div class="bar" id="shareBar" aria-label="Share of positive, neutral and negative mentions"></div>
+        <div class="legend small" id="shareLegend"></div>
+        <div id="alerts"></div>
+        <div class="row btns">
+          <button id="csv" class="btn" type="button">⬇️ Download mentions (CSV)</button>
+          <button id="share" class="btn" type="button">🔗 Copy link</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <h3 id="chartTitle">Mentions and mood per day</h3>
+        <div id="chart" class="chart"></div>
+        <div class="small" id="chartNote">Bars: number of mentions (green praise, red complaints, grey neutral). Line: mood score that day.</div>
+      </div>
+      <div class="card">
+        <h3>Where people talk about it</h3>
+        <table class="sources" id="sourceTable"></table>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="card">
+        <h3>👍 Praised for</h3>
+        <div id="praiseThemes" class="chips"></div>
+        <h4>Most positive mentions</h4>
+        <ul id="praise" class="mlist"></ul>
+      </div>
+      <div class="card">
+        <h3>👎 Complaints about</h3>
+        <div id="complaintThemes" class="chips"></div>
+        <h4>Most negative mentions</h4>
+        <ul id="critical" class="mlist"></ul>
+      </div>
+    </section>
+
+    <section class="card wide">
+      <div class="row between">
+        <h3>All mentions <span id="allCount" class="small"></span></h3>
+        <div class="row">
+          <select id="fLabel" aria-label="Filter by mood">
+            <option value="">Every mood</option><option value="positive">Positive</option>
+            <option value="neutral">Neutral</option><option value="negative">Negative</option>
+          </select>
+          <select id="fSource" aria-label="Filter by source"><option value="">Every source</option></select>
+        </div>
+      </div>
+      <ul id="all" class="mlist"></ul>
+      <button id="more" class="btn" type="button" hidden>Show more</button>
+    </section>
+  </main>
+
+  <section class="card wide">
+    <h3>📈 Tracked brands, checked twice a day</h3>
+    <p class="small">A scheduled job reads these names every 12 hours (adding Google News, which a web page cannot
+      read directly) and keeps their history, so you can see how the mood changes over weeks.
+      Edit <code>watchlist.json</code> in the repository to track your own.</p>
+    <div id="tracked" class="tracked"><span class="small">Loading…</span></div>
+  </section>
+
+  <section class="card wide">
+    <h3>📋 Score your own text</h3>
+    <p class="small">Got reviews, comments or posts from somewhere this app can't read (X/Twitter, Facebook,
+      Google reviews, emails)? Paste them, <b>one per line</b>, and get the same mood report.</p>
+    <textarea id="paste" rows="6" placeholder="The delivery was fast and the staff were lovely!
+Waited 40 minutes and the order was wrong. Not coming back.
+Prices went up again this month." disabled></textarea>
+    <div class="row btns">
+      <input id="pasteName" type="text" placeholder="Name (optional)" maxlength="60" disabled>
+      <button id="pasteGo" class="btn primary" type="button" disabled>Score this text</button>
+    </div>
+  </section>
+
+  <section class="card wide how">
+    <h3>How it works</h3>
+    <ol>
+      <li><b>Search.</b> The page asks free public services that allow other websites to read them:
+        <a href="https://www.gdeltproject.org/" target="_blank" rel="noopener">GDELT</a> (news sites worldwide),
+        Reddit, Hacker News, Bluesky and Mastodon (for one-word names, the matching #hashtag).</li>
+      <li><b>Read.</b> Python (<code>monitor.py</code>) turns each reply into the same simple "mention" list, drops
+        repeats and posts that don't actually name what you typed.</li>
+      <li><b>Score.</b> Each mention gets a mood from −1 to +1 with
+        <a href="https://github.com/cjhutto/vaderSentiment" target="_blank" rel="noopener">VADER</a>, a sentiment model
+        built for social media, plus business words it doesn't know (recall, lawsuit, outage, layoffs, soars, award…).</li>
+      <li><b>Sum up.</b> Mood score 0 to 100 (50 = neutral), share of positive / neutral / negative mentions,
+        mood per source and per day, the words people use when they praise or complain, and an early warning when
+        complaints rise in the last 24 hours.</li>
+    </ol>
+    <h3>Honest notes</h3>
+    <ul>
+      <li><b>X (Twitter) is not included:</b> its API is paid and it blocks free reading. Paste posts into
+        "Score your own text" instead. Bluesky and Mastodon are included as free alternatives.</li>
+      <li>Some services limit how often a browser may ask. If one fails, the others still count, and tracked
+        brands fall back to the last scheduled check.</li>
+      <li>Mood scoring is English only and reads words, not sarcasm. Treat it as a quick pulse, then read the
+        mentions behind it.</li>
+      <li>News is scored on the headline only.</li>
+    </ul>
+    <p class="small">Combines three GeeksforGeeks Python projects: Twitter Sentiment Analysis, Scraping Reddit and
+      Scrape Most Reviewed News. Source code: <a href="https://github.com/Knarf24/brand-monitor">github.com/Knarf24/brand-monitor</a>.</p>
+  </section>
+
+  <script src="pyodide/pyodide.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
