@@ -1,0 +1,80 @@
+{
+ "updated": 1795651807,
+ "days": 7,
+ "browser_sources": {
+  "news": true,
+  "gnews": false,
+  "reddit": false,
+  "hn": true,
+  "bluesky": false,
+  "mastodon": true
+ },
+ "brands": [
+  {
+   "name": "Spotify",
+   "slug": "spotify",
+   "updated": 1795651686,
+   "mood": 55,
+   "verdict": "Liked",
+   "mentions": 176,
+   "trend": [
+    55
+   ]
+  },
+  {
+   "name": "Netflix",
+   "slug": "netflix",
+   "updated": 1795651703,
+   "mood": 53,
+   "verdict": "Mixed",
+   "mentions": 282,
+   "trend": [
+    53
+   ]
+  },
+  {
+   "name": "Tesla",
+   "slug": "tesla",
+   "updated": 1795651722,
+   "mood": 51,
+   "verdict": "Mixed",
+   "mentions": 282,
+   "trend": [
+    51
+   ]
+  },
+  {
+   "name": "Nike",
+   "slug": "nike",
+   "updated": 1795651754,
+   "mood": 54,
+   "verdict": "Mixed",
+   "mentions": 112,
+   "trend": [
+    54
+   ]
+  },
+  {
+   "name": "Starbucks",
+   "slug": "starbucks",
+   "updated": 1795651772,
+   "mood": 56,
+   "verdict": "Liked",
+   "mentions": 183,
+   "trend": [
+    56
+   ]
+  },
+  {
+   "name": "MTN",
+   "slug": "mtn",
+   "updated": 1795651805,
+   "mood": 54,
+   "verdict": "Mixed",
+   "mentions": 100,
+   "trend": [
+    54
+   ]
+  }
+ ]
+}
