@@ -4,13 +4,13 @@
 
 Small businesses rarely know what people say about them online, and checking every news site and forum by
 hand takes hours. Type a brand, product or name and this app gathers what **news sites (GDELT), Reddit,
-Hacker News, Bluesky and Mastodon** said about it, **scores every mention by mood** and shows:
+Hacker News and Mastodon** said about it, **scores every mention by mood** and shows:
 
 - a **mood score** from 0 to 100 (50 = neutral) and the share of positive, neutral and negative mentions
 - mood **per source** and **per day**
 - what people **praise** and what they **complain about** (most used words and phrases)
 - the most positive and most negative mentions, with links
-- an **early warning** when complaints rise in the last 24 hours, or mentions suddenly spike
+- an **early warning** when complaints rise (or fall) in the last 24 hours
 - a CSV download of every mention
 - **Score your own text**: paste reviews or posts from places the app can't read (X, Facebook, Google reviews)
 
@@ -35,8 +35,10 @@ Reviewed News.
 
 ## Honest notes
 
-- **X (Twitter) is not included**: its API is paid. Bluesky and Mastodon are free alternatives, and you can
-  paste X posts into "Score your own text".
+- **X (Twitter) is not included**: its API is paid. Mastodon is a free alternative, and you can paste X posts
+  into "Score your own text". Bluesky's public search now needs a login, so it is left out.
+- Reddit blocks requests from GitHub's servers (403), so the scheduled job usually has no Reddit data; the web
+  page still tries Reddit from your browser.
 - Google News has no "allow other websites" header, so only the scheduled job reads it.
 - Free services may limit how often they are asked. If one fails, the rest still count.
 - Mood scoring is English only, news is scored on the headline, and sarcasm fools it. Use it as a quick pulse.

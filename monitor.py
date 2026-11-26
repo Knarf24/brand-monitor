@@ -6,7 +6,7 @@ The same Python runs in three places:
   * on a desktop from the command line:  python collect.py "Brand name"
 
 What it does
-  1. plan()      builds the search links for each free source (news, Reddit, Hacker News, Bluesky, Mastodon).
+  1. plan()      builds the search links for each free source (news, Reddit, Hacker News, Mastodon).
   2. parse_*()   turns each source's raw reply into the same simple "mention" records.
   3. score()     rates each mention from -1 (angry) to +1 (happy) with VADER, a sentiment model made for
                  short social media text, plus extra business-news words VADER does not know
@@ -45,10 +45,12 @@ SOURCES = {
     "pasted": {"label": "Your own text", "icon": "📋", "home": ""},
 }
 
-# Sources a web page may call directly. Google News has no "allow other websites" header, so it is
-# only read by the scheduled job (which runs on a server, not in a browser).
-BROWSER_SOURCES = ["news", "reddit", "hn", "bluesky", "mastodon"]
-SERVER_SOURCES = ["news", "gnews", "reddit", "hn", "bluesky", "mastodon"]
+# Sources a web page may call directly (checked from the scheduled job on 2026-11-26: GDELT, Hacker News and
+# Mastodon send the "allow other websites" header). Google News does not, so only the scheduled job reads it.
+# Reddit blocks data-centre servers but often answers browsers, so the page tries it.
+# Bluesky's public search now needs a login (403), so it is left out; parse_bluesky is kept for later.
+BROWSER_SOURCES = ["news", "reddit", "hn", "mastodon"]
+SERVER_SOURCES = ["news", "gnews", "reddit", "hn", "mastodon"]
 
 
 def clean_name(name):
@@ -330,7 +332,8 @@ theirs them then there these they this those through to too under until up us ve
 when where which while who whom why will with would you your yours yourself ve d m amp quot via rt https http
 www com html still way make made going go know think see want need people time year years day days week
 today new news will just get re one two first back many lot thing things honestly actually literally
-basically pretty anyone someone everyone something anything everything since yet already""".split())
+basically pretty don't doesn't didn't can't won't isn't it's i'm use used using
+anyone someone everyone something anything everything since yet already""".split())
 
 WORD_RE = re.compile(r"[a-z][a-z'\-]{2,}")
 
@@ -438,9 +441,6 @@ def report(name, mentions, days=7, statuses=None, now=None):
         elif b - r >= 15:
             alerts.append("Good news: negative mentions fell to %d%% in the last 24 hours, from %d%% before."
                           % (round(r), round(b)))
-    if len(before) >= 3 and len(recent) >= 3 * max(1.0, len(before) / max(1, days - 1)) and len(recent) >= 10:
-        alerts.append("Buzz spike: %d mentions in the last 24 hours, about %d times the usual daily amount."
-                      % (len(recent), round(len(recent) / max(1.0, len(before) / max(1, days - 1)))))
 
     return {
         "name": name, "version": VERSION, "generated": now, "days": days,

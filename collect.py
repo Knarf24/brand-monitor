@@ -95,7 +95,7 @@ def update_watchlist(days=7):
                       "verdict": rep["verdict"], "mentions": rep["mentions_total"],
                       "trend": [h["mood"] for h in history[-20:]]})
         print_report(rep)
-        time.sleep(2)  # be gentle with the free services
+        time.sleep(8)  # be gentle: GDELT allows about one search every 5 seconds
     with open(os.path.join(DATA, "index.json"), "w") as f:
         json.dump({"updated": int(time.time()), "days": days, "browser_sources": browser_seen, "brands": index},
                   f, indent=1)
