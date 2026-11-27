@@ -1,5 +1,5 @@
 {
- "updated": 1795741566,
+ "updated": 1795792500,
  "days": 7,
  "browser_sources": {
   "news": true,
@@ -12,83 +12,88 @@
   {
    "name": "Spotify",
    "slug": "spotify",
-   "updated": 1795741361,
-   "mood": 56,
+   "updated": 1795792324,
+   "mood": 55,
    "verdict": "Liked",
-   "mentions": 180,
+   "mentions": 266,
    "trend": [
     55,
     55,
     52,
     56,
-    56
+    56,
+    55
    ]
   },
   {
    "name": "Netflix",
    "slug": "netflix",
-   "updated": 1795741402,
+   "updated": 1795792346,
    "mood": 56,
    "verdict": "Liked",
-   "mentions": 207,
+   "mentions": 272,
    "trend": [
     53,
     54,
     53,
     55,
+    56,
     56
    ]
   },
   {
    "name": "Tesla",
    "slug": "tesla",
-   "updated": 1795741436,
-   "mood": 52,
-   "verdict": "Mixed",
-   "mentions": 277,
+   "updated": 1795792384,
+   "mood": 55,
+   "verdict": "Liked",
+   "mentions": 200,
    "trend": [
     51,
     51,
     51,
     51,
-    52
+    52,
+    55
    ]
   },
   {
    "name": "Nike",
    "slug": "nike",
-   "updated": 1795741476,
+   "updated": 1795792420,
    "mood": 53,
    "verdict": "Mixed",
-   "mentions": 109,
+   "mentions": 108,
    "trend": [
     54,
     53,
     54,
     52,
+    53,
     53
    ]
   },
   {
    "name": "Starbucks",
    "slug": "starbucks",
-   "updated": 1795741516,
-   "mood": 60,
+   "updated": 1795792458,
+   "mood": 59,
    "verdict": "Liked",
-   "mentions": 122,
+   "mentions": 123,
    "trend": [
     56,
     56,
     59,
     58,
-    60
+    60,
+    59
    ]
   },
   {
    "name": "MTN",
    "slug": "mtn",
-   "updated": 1795741558,
-   "mood": 51,
+   "updated": 1795792492,
+   "mood": 52,
    "verdict": "Mixed",
    "mentions": 100,
    "trend": [
@@ -96,7 +101,8 @@
     54,
     54,
     55,
-    51
+    51,
+    52
    ]
   }
  ]
