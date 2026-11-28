@@ -19,26 +19,26 @@
       with Pyodide. No account, no paid services, nothing stored on a server.</p>
   </header>
 
-  <div id="loading" class="loading">
+  <div id="loading" class="loading slim" role="status">
     <div class="spinner"></div>
     <div>
-      <b id="loadText">Starting Python…</b>
-      <div class="small">First visit downloads about 10 MB. Later visits are faster.</div>
+      <b id="loadText">Starting Python in the background…</b>
+      <div class="small">The first visit downloads Python once (about 10 MB). After that it is saved on this device.</div>
     </div>
   </div>
 
   <section class="card search">
     <form id="form" class="row">
       <input id="name" type="search" placeholder="Brand, product or person, e.g. Spotify" maxlength="60"
-        autocomplete="off" aria-label="Name to check" required disabled>
-      <select id="days" aria-label="How far back" disabled>
+        autocomplete="off" aria-label="Name to check" required>
+      <select id="days" aria-label="How far back">
         <option value="1">Last 24 hours</option>
         <option value="3">Last 3 days</option>
         <option value="7" selected>Last 7 days</option>
         <option value="14">Last 14 days</option>
         <option value="30">Last 30 days</option>
       </select>
-      <button id="go" class="btn primary" type="submit" disabled>🔎 Check reputation</button>
+      <button id="go" class="btn primary" type="submit">🔎 Check reputation</button>
     </form>
     <label class="small opt"><input id="strict" type="checkbox" checked> Only posts that actually name it
       (turn off for very new or unusual names)</label>
@@ -127,10 +127,10 @@
       Google reviews, emails)? Paste them, <b>one per line</b>, and get the same mood report.</p>
     <textarea id="paste" rows="6" placeholder="The delivery was fast and the staff were lovely!
 Waited 40 minutes and the order was wrong. Not coming back.
-Prices went up again this month." disabled></textarea>
+Prices went up again this month."></textarea>
     <div class="row btns">
-      <input id="pasteName" type="text" placeholder="Name (optional)" maxlength="60" disabled>
-      <button id="pasteGo" class="btn primary" type="button" disabled>Score this text</button>
+      <input id="pasteName" type="text" placeholder="Name (optional)" maxlength="60">
+      <button id="pasteGo" class="btn primary" type="button">Score this text</button>
     </div>
   </section>
 
@@ -167,6 +167,7 @@ Prices went up again this month." disabled></textarea>
   </section>
 
   <script src="pyodide/pyodide.js"></script>
+  <script src="pyfast.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
