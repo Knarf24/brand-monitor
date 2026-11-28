@@ -12,31 +12,40 @@ let tracked = { brands: [] }; // data/index.json from the scheduled job
 let shown = 0;
 
 // ---------- start-up ----------
+// Python starts in the background while the page is already usable; a check waits for it if needed.
+let pyReady = null;
+async function startPython() {
+  const files = Promise.all(PY_FILES.map(async (f) => {
+    const r = await fetch("py/" + f);
+    if (!r.ok) throw new Error(f + " missing");
+    return [f, new Uint8Array(await r.arrayBuffer())];
+  }));
+  py = await loadPyodideFast();
+  py.FS.mkdirTree("/home/pyodide/vaderSentiment");
+  for (const [f, bytes] of await files) py.FS.writeFile("/home/pyodide/" + f, bytes);
+  py.runPython("import monitor; monitor.analyzer()");
+  mon = py.pyimport("monitor");
+}
+
 async function start() {
+  pyReady = startPython();
+  document.documentElement.dataset.ui = "ready";
+  const p = new URLSearchParams(location.search);
+  if (p.get("days")) $("days").value = p.get("days");
+  if (p.get("q")) { $("name").value = p.get("q"); check(); }
+  else if (p.get("tracked")) openTracked(p.get("tracked"));
   try {
-    py = await loadPyodide({ indexURL: new URL("pyodide/", location.href).href });
-    $("loadText").textContent = "Loading the mood model (VADER)…";
-    py.FS.mkdirTree("/home/pyodide/vaderSentiment");
-    await Promise.all(PY_FILES.map(async (f) => {
-      const r = await fetch("py/" + f);
-      if (!r.ok) throw new Error(f + " missing");
-      py.FS.writeFile("/home/pyodide/" + f, new Uint8Array(await r.arrayBuffer()));
-    }));
-    py.runPython("import monitor; monitor.analyzer()");
-    mon = py.pyimport("monitor");
+    await pyReady;
     $("loading").hidden = true;
-    document.querySelectorAll("#form input, #form select, #form button, #paste, #pasteName, #pasteGo")
-      .forEach((el) => { el.disabled = false; });
-    const p = new URLSearchParams(location.search);
-    if (p.get("days")) $("days").value = p.get("days");
-    if (p.get("q")) { $("name").value = p.get("q"); check(); }
-    else if (p.get("tracked")) openTracked(p.get("tracked"));
+    document.documentElement.dataset.py = "ready";
   } catch (e) {
     console.error(e);
     $("loading").classList.add("error");
-    $("loadText").textContent = "Sorry, the app could not start: " + e.message;
+    $("loadText").textContent = "Sorry, Python could not start: " + e.message + ". Please reload the page.";
     document.querySelector("#loading .spinner").style.display = "none";
   }
+  // Keeps Python saved on this device so the next visit starts without downloading it (see sw.js).
+  if ("serviceWorker" in navigator && isSecureContext) navigator.serviceWorker.register("sw.js").catch(() => {});
 }
 
 async function loadTracked() {
@@ -61,7 +70,6 @@ async function loadTracked() {
   const names = tracked.brands.length ? tracked.brands.map((b) => b.name) : ["Spotify", "Netflix", "Tesla", "Nike"];
   $("examples").innerHTML = names.map((n) => `<button type="button" class="chip link">${esc(n)}</button>`).join(" ");
   $("examples").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
-    if (!mon) return;
     $("name").value = b.textContent; check();
   }));
 }
@@ -82,11 +90,14 @@ async function fetchText(url) {
 
 async function check() {
   const name = $("name").value.trim();
-  if (!name || busy || !mon) return;
+  if (!name || busy) return;
   busy = true; $("go").disabled = true;
   const days = +$("days").value;
   const strict = $("strict").checked;
   history.replaceState(null, "", `?q=${encodeURIComponent(name)}&days=${days}`);
+  say(mon ? "" : "Python is still starting; the check begins in a moment…", "info");
+  try { await pyReady; }
+  catch (e) { say("Python could not start, so the check can't run. Please reload the page.", "warn"); busy = false; $("go").disabled = false; return; }
   say("");
   const plan = JSON.parse(mon.plan_json(name, days, "browser"));
   const st = $("statuses");
@@ -135,9 +146,13 @@ async function openTracked(slug, keepMessage) {
   } catch { say("That tracked brand could not be loaded.", "warn"); }
 }
 
-function scorePasted() {
+async function scorePasted() {
   const text = $("paste").value.trim();
-  if (!text || !mon) return;
+  if (!text) return;
+  if (!mon) {
+    say("Python is still starting; your text will be scored in a moment…", "info");
+    try { await pyReady; } catch (e) { say("Python could not start. Please reload the page.", "warn"); return; }
+  }
   const name = $("pasteName").value.trim() || "Your text";
   const rep = JSON.parse(mon.analyze_json(name, JSON.stringify({ pasted: text }), 1, false));
   $("statuses").hidden = true;

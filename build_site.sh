@@ -9,3 +9,7 @@ cp vaderSentiment/__init__.py vaderSentiment/vaderSentiment.py vaderSentiment/va
    vaderSentiment/emoji_utf8_lexicon.txt _site/py/vaderSentiment/
 cp data/*.json _site/data/ 2>/dev/null || true
 touch _site/.nojekyll
+# Tell the service worker which Pyodide version this is, so every app on the site can share one saved copy.
+PYODIDE_VERSION=$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' web/pyodide/package.json | head -1)
+[ -n "$PYODIDE_VERSION" ] && sed -i "s/^const PYODIDE_VERSION = \"dev\";/const PYODIDE_VERSION = \"$PYODIDE_VERSION\";/" _site/sw.js
+true
